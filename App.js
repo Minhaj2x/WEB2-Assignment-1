@@ -1,92 +1,126 @@
-import React from 'react';
-import { View, Text, Button, ScrollView, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, Button, ScrollView, Image, TouchableOpacity } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
-// Task Card Component
-const TaskCard = ({ task, onPress }) => {
+// Task Component
+function Task({ task, onPress }) {
   return (
     <TouchableOpacity style={styles.card} onPress={onPress}>
       <Image source={{ uri: task.image }} style={styles.taskImage} />
       <Text style={styles.taskTitle}>{task.title}</Text>
-      <Text style={styles.taskDescription}>{task.description}</Text>
+      <Text>{task.description}</Text>
     </TouchableOpacity>
   );
-};
+}
 
-// Home Screen (Task List)
-const HomeScreen = ({ navigation }) => {
-  const tasks = [
-    { id: 1, title: 'Task 1', description: 'This is task 1', image: 'https://via.placeholder.com/100' },
-    { id: 2, title: 'Task 2', description: 'This is task 2', image: 'https://via.placeholder.com/100' },
-    { id: 3, title: 'Task 3', description: 'This is task 3', image: 'https://via.placeholder.com/100' },
-  ];
+// Task Details Screen
+function TaskDetails({ route }) {
+  const { task } = route.params;
+  return (
+    <View style={styles.container}>
+      <Text style={styles.header}>{task.title}</Text>
+      <Image source={{ uri: task.image }} style={styles.taskImageLarge} />
+      <Text style={styles.taskDescription}>{task.description}</Text>
+      <Text style={styles.taskStatus}>{task.completed ? 'Task Completed' : 'Task Pending'}</Text>
+    </View>
+  );
+}
+
+// Home Screen
+function HomeScreen({ navigation }) {
+  const [tasks, setTasks] = useState([
+    {
+      id: '1',
+      title: 'Complete Homework',
+      description: 'Complete the React Native assignment.',
+      image: 'https://via.placeholder.com/150',
+      completed: false,
+    },
+    {
+      id: '2',
+      title: 'Buy Groceries',
+      description: 'Pick up groceries from the store.',
+      image: 'https://via.placeholder.com/150',
+      completed: false,
+    },
+    {
+      id: '3',
+      title: 'Clean the House',
+      description: 'Clean the living room and kitchen.',
+      image: 'https://via.placeholder.com/150',
+      completed: false,
+    },
+  ]);
+
+  const handleTaskPress = (task) => {
+    navigation.navigate('TaskDetails', { task });
+  };
 
   return (
-    <ScrollView>
-      {tasks.map(task => (
-        <TaskCard key={task.id} task={task} onPress={() => navigation.navigate('TaskDetails', { taskId: task.id })} />
+    <ScrollView style={styles.container}>
+      <Text style={styles.header}>Task Manager</Text>
+      {tasks.map((task) => (
+        <Task key={task.id} task={task} onPress={() => handleTaskPress(task)} />
       ))}
     </ScrollView>
   );
-};
+}
 
-// Task Details Screen
-const TaskDetailsScreen = ({ route }) => {
-  const { taskId } = route.params;
-
-  const taskDetails = {
-    1: { title: 'Task 1', description: 'Detailed description for task 1', image: 'https://via.placeholder.com/200' },
-    2: { title: 'Task 2', description: 'Detailed description for task 2', image: 'https://via.placeholder.com/200' },
-    3: { title: 'Task 3', description: 'Detailed description for task 3', image: 'https://via.placeholder.com/200' },
-  };
-
-  const task = taskDetails[taskId];
-
-  return (
-    <View style={styles.detailsScreen}>
-      <Image source={{ uri: task.image }} style={styles.taskImage} />
-      <Text style={styles.taskTitle}>{task.title}</Text>
-      <Text style={styles.taskDescription}>{task.description}</Text>
-      <Button title="Go back" onPress={() => navigation.goBack()} />
-    </View>
-  );
-};
-
-// Create Stack Navigator
 const Stack = createStackNavigator();
 
-// Main App
-const App = () => {
+export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Home">
         <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="TaskDetails" component={TaskDetailsScreen} />
+        <Stack.Screen name="TaskDetails" component={TaskDetails} />
       </Stack.Navigator>
     </NavigationContainer>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  taskTitle: { fontSize: 18, fontWeight: 'bold' },
-  taskDescription: { fontSize: 14, color: 'gray' },
-  card: {
-    padding: 10,
-    marginBottom: 10,
-    backgroundColor: '#f4f4f4',
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.5,
-  },
-  taskImage: { width: 100, height: 100, borderRadius: 10 },
-  detailsScreen: {
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
     padding: 20,
-    justifyContent: 'center',
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  card: {
+    backgroundColor: '#f0f0f0',
+    padding: 15,
+    marginBottom: 10,
+    borderRadius: 10,
+    flexDirection: 'row',
     alignItems: 'center',
   },
+  taskImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 10,
+  },
+  taskTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  taskImageLarge: {
+    width: 200,
+    height: 200,
+    marginBottom: 15,
+    borderRadius: 10,
+  },
+  taskDescription: {
+    fontSize: 16,
+    marginBottom: 15,
+  },
+  taskStatus: {
+    fontSize: 18,
+    color: 'green',
+  },
 });
-
-export default App;
